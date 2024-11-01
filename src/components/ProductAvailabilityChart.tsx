@@ -1,85 +1,118 @@
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import type { Product } from "@/types/supplier";
 
-interface ProductAvailabilityChartProps {
-    data: Product[];
+interface Product {
+    product_name: string;
+    availability: "Y" | "N" | "Q";
 }
 
-export function ProductAvailabilityChart({ data }: ProductAvailabilityChartProps) {
-    const chartRef = useRef<SVGSVGElement>(null);
+interface Company {
+    company: string;
+    products: Product[];
+}
+
+interface ProductMatrixProps {
+    data: Company[];
+}
+
+export function ProductAvailabilityChart({ data }: ProductMatrixProps) {
+    const svgRef = useRef<SVGSVGElement>(null);
 
     useEffect(() => {
-        if (!chartRef.current) return;
+        if (!svgRef.current) return;
 
-        // Clear previous chart
-        d3.select(chartRef.current).selectAll("*").remove();
+        // Clear previous content
+        d3.select(svgRef.current).selectAll("*").remove();
 
-        // Set up dimensions
-        const margin = { top: 20, right: 100, bottom: 100, left: 150 };
+        // Setup dimensions
+        const margin = { top: 10, right: 40, bottom: 40, left: 200 };
         const width = 800 - margin.left - margin.right;
-        const height = 600 - margin.top - margin.bottom;
+        const height = 800 - margin.top - margin.bottom; 
 
         // Create SVG
         const svg = d3
-            .select(chartRef.current)
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
+            .select(svgRef.current)
+            .attr("width", width + margin.left + margin.right + 100)
+            .attr("height", height + margin.top + margin.bottom + 100)
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        // Get all product types
-        const productTypes = Object.keys(data[0].products);
+        // Get unique product names
+        const productNames = Array.from(new Set(data.flatMap((d) => d.products.map((p) => p.product_name))));
 
         // Create scales
-        const x = d3
+        const xScale = d3
             .scaleBand()
+            .domain(data.map((d) => d.company))
             .range([0, width])
-            .domain(data.map((d) => d.name))
             .padding(0.1);
 
-        const y = d3.scaleBand().range([height, 0]).domain(productTypes).padding(0.1);
+        const yScale = d3.scaleBand().domain(productNames).range([0, height]).padding(0.1);
 
-        // Add axes
+        // Add X axis
         svg.append("g")
             .attr("transform", `translate(0,${height})`)
-            .call(d3.axisBottom(x))
+            .call(d3.axisBottom(xScale))
             .selectAll("text")
             .attr("transform", "rotate(-45)")
+            .attr("font-size", "15")
             .style("text-anchor", "end");
 
-        svg.append("g").call(d3.axisLeft(y));
+        // Add Y axis
+        svg.append("g").call(d3.axisLeft(yScale)).selectAll("text").attr("font-size", "15");
 
         // Add cells
-        data.forEach((supplier) => {
-            productTypes.forEach((product) => {
-                const availability = supplier.products[product as keyof typeof supplier.products];
-                const color = availability === "Y" ? "#16a34a" : availability === "N" ? "#dc2626" : "#94a3b8";
+        data.forEach((company: Company) => {
+            company.products.forEach((product: Product) => {
+                const color = product.availability === "Y" ? "#22c55e" : product.availability === "N" ? "#ef4444" : "#94a3b8";
 
+                // Add rectangle
                 svg.append("rect")
-                    .attr("x", x(supplier.name))
-                    .attr("y", y(product))
-                    .attr("width", x.bandwidth())
-                    .attr("height", y.bandwidth())
+                    .attr("x", xScale(company.company) ?? "")
+                    .attr("y", yScale(product.product_name) ?? "")
+                    .attr("width", xScale.bandwidth())
+                    .attr("height", yScale.bandwidth())
                     .attr("fill", color)
-                    .attr("opacity", availability === "Q" ? 0.3 : 0.8);
-
-                svg.append("text")
-                    .attr("x", x(supplier.name)! + x.bandwidth() / 2)
-                    .attr("y", y(product)! + y.bandwidth() / 2)
-                    .attr("text-anchor", "middle")
-                    .attr("dominant-baseline", "middle")
-                    .attr("fill", "white")
-                    .text(availability);
+                    .attr("opacity", product.availability === "Q" ? 0.5 : 0.8)
+                    .attr("rx", 4)
+                    .attr("ry", 4);
             });
+        });
+
+        // Add legend
+        const legend = svg
+            .append("g")
+            .attr("font-family", "sans-serif")
+            .attr("font-size", 15)
+            .attr("text-anchor", "start")
+            .attr("transform", `translate(${width + 10}, 0)`);
+
+        const legendItems = [
+            { label: "Yes", color: "#22c55e", value: "Y" },
+            { label: "No", color: "#ef4444", value: "N" },
+            { label: "Unclear", color: "#94a3b8", value: "Q" },
+        ];
+
+        legendItems.forEach((item, i) => {
+            const legendRow = legend.append("g").attr("transform", `translate(0, ${i * 25})`);
+
+            legendRow
+                .append("rect")
+                .attr("width", 20)
+                .attr("height", 20)
+                .attr("fill", item.color)
+                .attr("opacity", item.value === "Q" ? 0.5 : 0.8)
+                .attr("rx", 2)
+                .attr("ry", 2);
+
+            legendRow.append("text").attr("x", 24).attr("y", 9.5).attr("dy", "0.32em").attr("font-weight", "bold").text(item.label);
         });
     }, [data]);
 
     return (
-        <div className="p-6 mt-6">
-            <h2 className="text-2xl font-bold mb-6">Product Availability Matrix</h2>
+        <div>
             <div className="overflow-x-auto">
-                <svg ref={chartRef} className="mx-auto" />
+                <svg ref={svgRef} className="mx-auto" style={{ minWidth: "800px" }} />
             </div>
         </div>
     );
