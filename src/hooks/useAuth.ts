@@ -1,7 +1,6 @@
 import { supabase } from "@/supabaseClient";
 import { useEffect, useState } from "react";
-// import { useToast } from "@/hooks/use-toast";
-import { useSnackbar } from 'notistack'
+import { useSnackbar } from "notistack";
 
 interface LoginCredentials {
     email: string;
@@ -12,16 +11,16 @@ export function useAuth() {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const { enqueueSnackbar } = useSnackbar()
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
-        setLoading(true)
+        setLoading(true);
         // Check current session on load
         const session = supabase.auth.getSession();
         session.then(({ session }: any) => {
             setUser(session?.user ?? null);
             setIsAuthenticated(Boolean(session?.user));
-            setLoading(false)
+            setLoading(false);
         });
 
         // Listen for auth state changes
@@ -40,17 +39,13 @@ export function useAuth() {
             email,
             password,
         });
-        console.log("data............");
-        console.log(data);
-        console.log("error...............");
-        console.log(error);
 
         if (error) {
-            enqueueSnackbar('Invalid credentials')
+            enqueueSnackbar("Invalid credentials");
             return;
         }
 
-        enqueueSnackbar('Logged in successfully')
+        enqueueSnackbar("Logged in successfully");
         setIsAuthenticated(true);
         setUser(data.user);
     };
@@ -58,7 +53,7 @@ export function useAuth() {
     const logout = async () => {
         const { error } = await supabase.auth.signOut();
         if (error) {
-            enqueueSnackbar('Error signing out')
+            enqueueSnackbar("Error signing out");
             return;
         }
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import { Company } from "@/types/supplier";
+import { Company } from "@/types";
 
 type BarChartProps = {
     data: Company[];
@@ -136,13 +136,6 @@ const CompanyBarChart = ({ data }: BarChartProps) => {
             .attr("font-weight", "bold")
             .text((d: any) => d.label);
 
-        // Add title
-        // svg.append("text")
-        //     .attr("x", width / 2)
-        //     .attr("y", -margin.top / 2)
-        //     .attr("text-anchor", "middle")
-        //     .attr("class", "text-lg font-semibold")
-        //     .text("Company Ratings");
     }, [data]);
 
     return (

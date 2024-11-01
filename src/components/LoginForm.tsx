@@ -1,4 +1,3 @@
-// import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import React from "react";
@@ -13,9 +12,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     const [password, setPassword] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         setLoading(true);
-        onLogin({ email, password });
+        await onLogin({ email, password });
+        setLoading(false);
     };
 
     return (
@@ -43,7 +43,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
 
                         <Button
                             disabled={loading}
-                            className="w-full flex items-center justify-center bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors group mt-6"
+                            className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors group mt-6"
                             type="button"
                             onClick={handleLogin}
                         >

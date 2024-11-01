@@ -27,7 +27,7 @@ export function ProductAvailabilityChart({ data }: ProductMatrixProps) {
         // Setup dimensions
         const margin = { top: 10, right: 40, bottom: 40, left: 200 };
         const width = 800 - margin.left - margin.right;
-        const height = 800 - margin.top - margin.bottom;
+        const height = 800 - margin.top - margin.bottom; 
 
         // Create SVG
         const svg = d3
@@ -48,8 +48,6 @@ export function ProductAvailabilityChart({ data }: ProductMatrixProps) {
             .padding(0.1);
 
         const yScale = d3.scaleBand().domain(productNames).range([0, height]).padding(0.1);
-        // const yScale = d3.scaleBand().domain(productNames).range([0, height]).padding(0.1);
-        // const yScale = d3.scaleLinear().domain(productNames).nice().range([height, 0]);
 
         // Add X axis
         svg.append("g")
@@ -57,7 +55,6 @@ export function ProductAvailabilityChart({ data }: ProductMatrixProps) {
             .call(d3.axisBottom(xScale))
             .selectAll("text")
             .attr("transform", "rotate(-45)")
-            .attr("beaf", "1234")
             .attr("font-size", "15")
             .style("text-anchor", "end");
 
@@ -65,30 +62,20 @@ export function ProductAvailabilityChart({ data }: ProductMatrixProps) {
         svg.append("g").call(d3.axisLeft(yScale)).selectAll("text").attr("font-size", "15");
 
         // Add cells
-        data.forEach((company) => {
-            company.products.forEach((product) => {
+        data.forEach((company: Company) => {
+            company.products.forEach((product: Product) => {
                 const color = product.availability === "Y" ? "#22c55e" : product.availability === "N" ? "#ef4444" : "#94a3b8";
 
                 // Add rectangle
                 svg.append("rect")
-                    .attr("x", xScale(company.company))
-                    .attr("y", yScale(product.product_name))
+                    .attr("x", xScale(company.company) ?? "")
+                    .attr("y", yScale(product.product_name) ?? "")
                     .attr("width", xScale.bandwidth())
                     .attr("height", yScale.bandwidth())
                     .attr("fill", color)
                     .attr("opacity", product.availability === "Q" ? 0.5 : 0.8)
                     .attr("rx", 4)
                     .attr("ry", 4);
-
-                // Add text
-                // svg.append("text")
-                //     .attr("x", xScale(company.company)! + xScale.bandwidth() / 2)
-                //     .attr("y", yScale(product.product_name)! + yScale.bandwidth() / 2)
-                //     .attr("text-anchor", "middle")
-                //     .attr("dominant-baseline", "middle")
-                //     .attr("fill", "white")
-                //     .attr("font-weight", "bold")
-                //     .text(product.availability);
             });
         });
 
