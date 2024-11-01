@@ -20,16 +20,16 @@ export function LoginForm({ onLogin }: LoginFormProps) {
 
     return (
         <React.Fragment>
-            <div className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-6 min-h-screen">
+            <div className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-6 min-h-screen text-center">
                 <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 transform transition-all hover:scale-105 duration-300">
                     <h2 className="text-3xl font-semibold text-gray-800 mb-4">Login</h2>
 
-                    <p className="text-gray-600 mb-6">Start your data journey by uploading your first dataset or creating a new visualization.</p>
+                    <p className="text-gray-600 mb-6">login to start your data journey.</p>
 
                     <form className="grid gap-4">
                         <div className="grid gap-2">
                             <label htmlFor="username" className="block text-xs font-medium text-gray-500 text-left">
-                                Username
+                                Email
                             </label>
                             <Input id="username" name="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                         </div>
@@ -58,7 +58,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                             Login
                         </Button>
                     </form>
-                    <div className="mt-6 text-xs text-gray-500">Tip: Drag and drop files or connect to data sources</div>
+                    <div className="mt-6 text-xs text-gray-500">Tip: check login details in Readme</div>
                 </div>
             </div>
         </React.Fragment>
