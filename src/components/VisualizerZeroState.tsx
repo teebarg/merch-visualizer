@@ -1,5 +1,3 @@
-import React from "react";
-
 const VisualizerZeroState = () => {
     return (
         <div className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-6 flex-1">

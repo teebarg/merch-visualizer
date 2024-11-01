@@ -1,6 +1,6 @@
 import { supabase } from "@/supabaseClient";
 import * as XLSX from "xlsx";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { CancelIcon, UploadIcon } from "nui-react-icons";
 
 export enum FileTypes {
@@ -16,6 +16,7 @@ interface DragNDropProps {
 const FileUpload: React.FC<DragNDropProps> = ({ onLoad }) => {
     const [file, setFile] = useState<File>();
     const [loading, setLoading] = useState<boolean>(false);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const handleFileUpload = async () => {
         console.log(file);
@@ -82,6 +83,9 @@ const FileUpload: React.FC<DragNDropProps> = ({ onLoad }) => {
 
     const handleCancel = () => {
         setFile(undefined);
+        if (inputRef.current) {
+            inputRef.current.value = ""; // Clear the input field
+        }
     };
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,35 +99,47 @@ const FileUpload: React.FC<DragNDropProps> = ({ onLoad }) => {
         setFile(file);
     };
 
+    const onUpload = () => {
+        if (inputRef.current) {
+            inputRef.current.click();
+        }
+    };
+
     return (
         <div className="">
-            <div className="min-w-96 max-w-md mx-auto bg-content2 p-4 rounded-md shadow-md relative border-dashed border-2 border-sky-500 min-h-[10rem] flex flex-col place-content-center place-items-center">
+            <div className="min-w-96 max-w-md mx-auto bg-content2 p-6 rounded-md shadow-md relative border-dashed border-2 border-sky-500 min-h-[10rem] flex flex-col place-content-center place-items-center">
                 {file && (
-                    <button className="absolute top-3 right-4 bg-blue-500" type="button" onClick={handleCancel}>
+                    <button className="absolute top-3 right-4 bg-background text-foreground border border-muted-foreground" type="button" onClick={handleCancel}>
                         <CancelIcon aria-hidden="true" size={24} />
                     </button>
                 )}
                 <div>
-                    <div className="text-center space-y-2">
+                    <div className="flex flex-col text-center space-y-3 items-center justify-center">
                         <UploadIcon className="h-16 w-16 inline" fill="#007bff" />
-                        <button className="btn-custom group min-w-48 bg-primary text-primary-foreground" type="button">
+                        <p className="text-sm font-semibold text-gray-700">Click to upload dataset</p>
+                        <button className="btn-custom group min-w-48 bg-primary text-primary-foreground" type="button" onClick={onUpload}>
                             Select
                         </button>
                     </div>
                     <input
-                        // ref={inputRef}
+                        ref={inputRef}
                         accept={[FileTypes.xlsx].join(",")}
                         aria-hidden="true"
                         multiple={false}
                         type="file"
                         onChange={handleChange}
+                        className="hidden"
                     />
                 </div>
                 <div className="mt-4" slot="label">
                     {file && <span className="block">{file.name}</span>}
                 </div>
             </div>
-            <button disabled={loading} onClick={handleFileUpload} className="min-w-96 max-w-md mx-auto mt-2 flex items-center justify-center bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors group">
+            <button
+                disabled={loading || !file}
+                onClick={handleFileUpload}
+                className="min-w-96 max-w-md mx-auto mt-2 flex items-center justify-center bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors group"
+            >
                 {loading && (
                     <div aria-label="Loading" className="relative inline-flex flex-col gap-2 items-center justify-center">
                         <div className="relative flex w-5 h-5">
@@ -132,7 +148,7 @@ const FileUpload: React.FC<DragNDropProps> = ({ onLoad }) => {
                         </div>
                     </div>
                 )}
-                Submit
+                Upload
             </button>
         </div>
     );

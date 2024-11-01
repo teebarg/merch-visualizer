@@ -1,6 +1,7 @@
 import { supabase } from "@/supabaseClient";
 import { useEffect, useState } from "react";
 // import { useToast } from "@/hooks/use-toast";
+import { useSnackbar } from 'notistack'
 
 interface LoginCredentials {
     email: string;
@@ -10,14 +11,17 @@ interface LoginCredentials {
 export function useAuth() {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [user, setUser] = useState<any>(null);
-    // const { toast } = useToast();
+    const [loading, setLoading] = useState<boolean>(true);
+    const { enqueueSnackbar } = useSnackbar()
 
     useEffect(() => {
+        setLoading(true)
         // Check current session on load
         const session = supabase.auth.getSession();
         session.then(({ session }: any) => {
             setUser(session?.user ?? null);
             setIsAuthenticated(Boolean(session?.user));
+            setLoading(false)
         });
 
         // Listen for auth state changes
@@ -31,11 +35,10 @@ export function useAuth() {
         };
     }, []);
 
-    const login = async (credentials: LoginCredentials) => {
-        console.log(credentials);
+    const login = async ({ email, password }: LoginCredentials) => {
         const { data, error } = await supabase.auth.signInWithPassword({
-            email: "test@test.com",
-            password: "password",
+            email,
+            password,
         });
         console.log("data............");
         console.log(data);
@@ -43,59 +46,27 @@ export function useAuth() {
         console.log(error);
 
         if (error) {
-            console.log("Invalid credentials");
-            // toast({
-            //     title: "Error",
-            //     description: "Invalid credentials",
-            //     variant: "destructive",
-            // });
+            enqueueSnackbar('Invalid credentials')
             return;
         }
 
-        // toast({
-        //     title: "Success",
-        //     description: "Logged in successfully",
-        // });
+        enqueueSnackbar('Logged in successfully')
         setIsAuthenticated(true);
         setUser(data.user);
-        // // In a real app, this would make an API call
-        // if (credentials.email && credentials.password) {
-        //     setIsAuthenticated(true);
-        //     console.log("Logged in successfully");
-        //     console.log("isAuthenticated3333333333333");
-        //     console.log(isAuthenticated);
-        //     // toast({
-        //     //     title: "Success",
-        //     //     description: "Logged in successfully",
-        //     // });
-        // } else {
-        //     console.log("Invalid credentials");
-        //     // toast({
-        //     //     title: "Error",
-        //     //     description: "Invalid credentials",
-        //     //     variant: "destructive",
-        //     // });
-        // }
-        // console.log("isAuthenticated22222222");
-        // console.log(isAuthenticated);
     };
 
     const logout = async () => {
         const { error } = await supabase.auth.signOut();
         if (error) {
-            console.log("Error signing out");
+            enqueueSnackbar('Error signing out')
             return;
         }
 
         setIsAuthenticated(false);
-        // console.log("Invalid credentials");
-        // toast({
-        //     title: "Success",
-        //     description: "Logged out successfully",
-        // });
     };
 
     return {
+        loading,
         isAuthenticated,
         user,
         login,
